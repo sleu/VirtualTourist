@@ -15,7 +15,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        //Initialize the window
+        window = UIWindow.init(frame: UIScreen.main.bounds)
+        
+        if let window = window {
+            let mainVC = MapsViewController()
+            window.rootViewController = mainVC
+            window.backgroundColor = UIColor.white
+            window.makeKeyAndVisible()
+        }
         return true
     }
 
