@@ -7,3 +7,13 @@
 //
 
 import Foundation
+import UIKit
+import CoreData
+
+class PhotoAlbumViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        
+        print("newvc")
+    }
+}

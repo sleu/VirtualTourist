@@ -12,15 +12,17 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    let dataController = DataController(modelName: "VirtualTourist")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         //Initialize the window
         window = UIWindow.init(frame: UIScreen.main.bounds)
+        dataController.load()
         
         if let window = window {
             let mainVC = MapsViewController()
+            mainVC.dataController = dataController
             window.rootViewController = mainVC
             window.backgroundColor = UIColor.white
             window.makeKeyAndVisible()
@@ -48,8 +50,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        saveViewContext()
     }
-
-
+    
+    func saveViewContext() {
+        try? dataController.viewContext.save()
+    }
 }
 
