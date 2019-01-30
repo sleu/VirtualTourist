@@ -13,9 +13,22 @@ import CoreData
 extension MapsViewController: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        print("changevc")
-        //TODO: load photo album
+        
+        guard let annotation = view.annotation else {
+            print("annotation not found")
+            return
+        }
+        mapView.deselectAnnotation(annotation, animated: true)
+        let pin = view.annotation
         let newVC = PhotoAlbumViewController()
+        newVC.dataController = dataController
+        newVC.pin = pin as! MKPointAnnotation
+        let title = annotation.title
+        guard let indexTitle = Int(title!!) else {
+            print("NO TITLE")
+            return
+        }
+        newVC.realPin = loadPin(title: indexTitle)!
         self.navigationController?.pushViewController(newVC, animated: true)
     }
     
@@ -32,5 +45,10 @@ extension MapsViewController: MKMapViewDelegate {
             pinView!.annotation = annotation
         }
         return pinView
+    }
+    
+    func loadPin(title: Int) -> Pin? {
+        let pin = fetchedResultsController.fetchedObjects?[title]
+        return pin
     }
 }

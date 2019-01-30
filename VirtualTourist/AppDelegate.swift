@@ -22,8 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if let window = window {
             let mainVC = MapsViewController()
+            var navController: UINavigationController?
+            navController = UINavigationController(rootViewController: mainVC)
             mainVC.dataController = dataController
-            window.rootViewController = mainVC
+            window.rootViewController = navController
             window.backgroundColor = UIColor.white
             window.makeKeyAndVisible()
         }

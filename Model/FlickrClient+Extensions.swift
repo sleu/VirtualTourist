@@ -44,13 +44,28 @@ extension FlickrClient {
         static let APIKey = "d09355ba1f9f74a2899937d6c1ee5fef"
         static let ResponseFormat = "json"
         static let DisableJSONCallback = "1" /* 1 means "yes" */
-        static let MediumURL = "url_n"
+        static let MediumURL = "url_m"
         static let UseSafeSearch = "1"
         static let PhotosPerPage = "30"
         static let MaxPages = 133 //4000/30
         static let AccuracyCityLevel = "11" //check
         static let AccuracyStreetLevel = "16" //check
-        
+    }
+    
+    // MARK: Flickr Response Keys
+    struct FlickrResponseKeys {
+        static let Status = "stat"
+        static let Photos = "photos"
+        static let Photo = "photo"
+        static let Title = "title"
+        static let MediumURL = "url_m"
+        static let Pages = "pages"
+        static let Total = "total"
+    }
+    
+    // MARK: Flickr Response Values
+    struct FlickrResponseValues {
+        static let OKStatus = "ok"
     }
     
     func bboxString(latitude: Double, longitude: Double) -> String {

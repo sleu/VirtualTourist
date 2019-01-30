@@ -40,6 +40,11 @@ class MapsViewController: UIViewController {
         super.viewWillAppear(animated)
         setUpFetchedResultsController()
         self.loadData()
+        self.navigationController?.isNavigationBarHidden = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.isNavigationBarHidden = false
     }
     
     func setMapView() {
@@ -70,10 +75,11 @@ class MapsViewController: UIViewController {
         }
         
         var annotations = [MKPointAnnotation]()
-        for p in fetchedObj {
+        for (index, pin) in fetchedObj.enumerated() {
             let annotation = MKPointAnnotation()
-            let coordinates = CLLocationCoordinate2D(latitude: p.latitude, longitude: p.longitude)
+            let coordinates = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
             annotation.coordinate = coordinates
+            annotation.title = "\(index)"
             annotations.append(annotation)
         }
         mapView.removeAnnotations(mapView.annotations)
@@ -81,23 +87,26 @@ class MapsViewController: UIViewController {
     }
     
     @objc func createPin(_ sender: UIGestureRecognizer) {
-        //TODO: Drop a pin and record the pin
         if sender.state == .began {
             print("Begin")
             let loc = sender.location(in: mapView)
             let coordinate = mapView.convert(loc, toCoordinateFrom: mapView)
             let pinAnnotation = MKPointAnnotation()
             pinAnnotation.coordinate = coordinate
+            if let fetchedObj = fetchedResultsController.fetchedObjects {
+                pinAnnotation.title = "\(fetchedObj.count)"
+            }
             mapView.addAnnotation(pinAnnotation)
-            _ = Pin(lat: coordinate.latitude, long: coordinate.longitude, context: dataController.viewContext)
+            let pin = Pin(lat: coordinate.latitude, long: coordinate.longitude, context: dataController.viewContext)
+            pin.getPhotos(context: dataController.viewContext) //Load photos!!!
+            
             do {
                 try dataController.viewContext.save()
                 try fetchedResultsController.performFetch()
             } catch {
                 print(error.localizedDescription)
             }
-            //find photos for pin
-            //save
+            print("pin complete")
         }
     }
 }

@@ -13,13 +13,12 @@ class FlickrClient: NSObject {
     static let shared = FlickrClient()
     var session = URLSession.shared
     
-    func searchBy(latitude: Double, longitude: Double, page: Int, handler:@escaping (_ photos: [[String:AnyObject]]?, _ error: String?) -> Void){
+    func searchBy(latitude: Double, longitude: Double, pages: Int, handler: @escaping (_ photos: [[String:AnyObject]]?, _ pages: Int, _ error: String?) -> Void){
         
-        var validPage = 1
-        if page < FlickrParameterValues.MaxPages {
-            validPage = page
+        var thisPage = pages
+        if thisPage > 1 {
+            thisPage = Int(arc4random_uniform(UInt32(pages))) + 1
         }
-        
         let params = [
             FlickrParameterKeys.Method: FlickrParameterValues.SearchMethod,
             FlickrParameterKeys.APIKey: FlickrParameterValues.APIKey,
@@ -29,7 +28,7 @@ class FlickrClient: NSObject {
             FlickrParameterKeys.Format: FlickrParameterValues.ResponseFormat,
             FlickrParameterKeys.NoJSONCallback: FlickrParameterValues.DisableJSONCallback,
             FlickrParameterKeys.PhotosPerPage: FlickrParameterValues.PhotosPerPage,
-            FlickrParameterKeys.Page: "\(validPage)"
+            FlickrParameterKeys.Page: "\(thisPage)"
         ]
         
         let request = URLRequest(url: flickrURLFromParameters(params as [String : AnyObject]))
@@ -38,19 +37,19 @@ class FlickrClient: NSObject {
             
             //Was there an error?
             guard (error == nil) else {
-                handler(nil, error?.localizedDescription)
+                handler(nil, 1, error?.localizedDescription)
                 return
             }
             
             //Did we get a successful 2XX response?
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                handler(nil, error?.localizedDescription)
+                handler(nil, 1, error?.localizedDescription)
                 return
             }
             
             //Was there any data returned?
             guard let data = data else {
-                handler(nil, error?.localizedDescription)
+                handler(nil, 1, error?.localizedDescription)
                 return
             }
             
@@ -58,10 +57,43 @@ class FlickrClient: NSObject {
             do {
                 parsedResult = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as AnyObject
             } catch {
-                handler(nil, error.localizedDescription)
+                handler(nil, 1, error.localizedDescription)
                 return
             }
-            //TODO: what needs to be returned?
+            /* GUARD: Did Flickr return an error (stat != ok)? */
+            guard let stat = parsedResult[FlickrResponseKeys.Status] as? String, stat == FlickrResponseValues.OKStatus else {
+                print("Flickr API returned an error. See error code and message in \(String(describing: parsedResult))")
+                handler(nil, 1, error?.localizedDescription)
+                return
+            }
+            
+            /* GUARD: Is "photos" key in our result? */
+            guard let photosDictionary = parsedResult[FlickrResponseKeys.Photos] as? [String:AnyObject] else {
+                print("Cannot find keys '\(FlickrResponseKeys.Photos)' in \(String(describing: parsedResult))")
+                handler(nil, 1, error?.localizedDescription)
+                return
+            }
+            
+            /* GUARD: Is the "photo" key in photosDictionary? */
+            guard let photosArray = photosDictionary[FlickrResponseKeys.Photo] as? [[String: AnyObject]] else {
+                print("Cannot find key '\(FlickrResponseKeys.Photo)' in \(photosDictionary)")
+                handler(nil, 1, error?.localizedDescription)
+                return
+            }
+            
+            /* GUARD: Is "pages" key in the photosDictionary? */
+            guard let totalPages = photosDictionary[FlickrResponseKeys.Pages] as? Int else {
+                print("Cannot find key '\(FlickrResponseKeys.Pages)' in \(photosDictionary)")
+                handler(nil, 1, error?.localizedDescription)
+                return
+            }
+            let pageLimit = min(totalPages, FlickrParameterValues.MaxPages)
+            if photosArray.count == 0 {
+                handler(nil, 1, "No Photos")
+            } else {
+                handler(photosArray, pageLimit, nil)
+            }
         }
+        task.resume()
     }
 }
