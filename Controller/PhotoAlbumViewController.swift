@@ -14,61 +14,58 @@ import CoreData
 class PhotoAlbumViewController: UIViewController {
     
     let mapView = MKMapView()
-    let stackView = UIStackView()
     let newCollectButton = UIButton()
-    //let collection = UICollectionView()
-    //let flowLayout = UICollectionFlowLayout()
+    var collectionView: UICollectionView!
+    var flowLayout = UICollectionViewFlowLayout()
     var dataController:DataController!
+    var fetchedResultsController:NSFetchedResultsController<Photo>!
     var pin = MKPointAnnotation()
     var realPin: Pin?
     var photos: [Photo?] = []
     
+    fileprivate func setupFetchedResultsController() {
+        let fetchRequest:NSFetchRequest<Photo> = Photo.fetchRequest()
+        let predicate = NSPredicate(format: "pin == %@", realPin!)
+        fetchRequest.predicate = predicate
+        let sortDescriptor = NSSortDescriptor(key: "id", ascending: true)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription)")
+        }
+    }
+    
     override func viewDidLoad() {
-        //TODO: verify photos are even avail
+        mapView.delegate = self
+        view.backgroundColor = UIColor.blue
     }
     
     
     override func viewWillAppear(_ animated: Bool) {
+        setupFetchedResultsController()
         setMapView()
+        setFlowLayOutView()
         setCollectionView()
         setNewCollectionButton()
     }
     
-    func setMapView() {
-        let leftMargin: CGFloat = 0
-        let topMargin: CGFloat = 0
-        let mapWidth: CGFloat = view.frame.size.width
-        let mapHeight: CGFloat = view.frame.size.height
-        var region = MKCoordinateRegion()
-        var span = MKCoordinateSpan()
-        span.latitudeDelta = 1
-        span.longitudeDelta = 1
-        region.center = pin.coordinate
-        region.span = span
-        mapView.frame = CGRect(x: leftMargin, y: topMargin, width: mapWidth, height: mapHeight)
-        mapView.mapType = MKMapType.standard
-        mapView.isZoomEnabled = true
-        mapView.isScrollEnabled = true
-        mapView.center = view.center
-        view.addSubview(mapView)
-        mapView.addAnnotation(pin)
-        mapView.setRegion(region, animated: true)
+    @objc func getNewPhotos() {
+        let totalPages = Int((realPin?.pages.description)!)
+        if totalPages! <= 1 {
+            displayNotification("All Images Displayed")
+            return
+        }
+        
+        
+        collectionView.reloadData()
     }
     
-    func setNewCollectionButton() {
-        newCollectButton.setTitle("New Collection", for: UIControl.State.normal)
-        newCollectButton.setTitleColor(UIColor.blue, for: UIControl.State.normal)
-        newCollectButton.backgroundColor = UIColor.white
-        newCollectButton.clipsToBounds = true
-        newCollectButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(newCollectButton)
-        newCollectButton.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        newCollectButton.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        newCollectButton.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+    func displayNotification(_ error: String){
+        let alert = UIAlertController(title: "Error", message: error, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
     }
-    
-    func setCollectionView() {
-        //TODO: fetch photos, delete ability, new collection
-    }
-
 }

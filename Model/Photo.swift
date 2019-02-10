@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 extension Photo {
     
@@ -30,10 +31,29 @@ extension Photo {
             return
         }
         if let imageData = try? Data(contentsOf: imageURL) {
-            self.imageData = imageData //TODO: possibly change here for image data format
+            let image = UIImage(data: imageData)
+            let iData = image!.jpegData(compressionQuality: 0.9)
+            self.imageData = iData //TODO: possibly change here for image data format
             print("photodownloaded")
         } else {
             print("Image does not exist at \(imageURL)")
         }
+    }
+    
+    func downloadPhoto2() -> UIImage {
+        let image = UIImage()
+        guard let imageURL = URL(string: self.url!) else {
+            print("photo url is nil")
+            return image
+        }
+        print(imageURL)
+        if let imageData = try? Data(contentsOf: imageURL) {
+            self.imageData = imageData//TODO: possibly change here for image data format
+            print("photodownloaded")
+        } else {
+            print("Image does not exist at \(imageURL)")
+        }
+        return UIImage(data: imageData!)!
+        
     }
 }
