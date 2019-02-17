@@ -22,7 +22,7 @@ extension Pin {
         }
     }
     
-    func getPhotos(context: NSManagedObjectContext) { //TODO: how to reuse for new round of pics
+    func getPhotos(context: NSManagedObjectContext) {
         FlickrClient.shared.searchBy(latitude: latitude, longitude: longitude, pages: Int(pages)) { (photos, pages, errorMessage) in
             DispatchQueue.main.async {
                 print("getphotos")
@@ -32,7 +32,8 @@ extension Pin {
                 }
                 self.pages = Int16(pages)
                 for p in photos! where p["url_m"] != nil {
-                    _ = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self, context: context)
+                    let newPhoto = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self, context: context)
+                    newPhoto.downloadPhoto()
                     print("Creatingphoto")
                 }
                 print("photos completed")

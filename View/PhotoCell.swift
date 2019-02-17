@@ -11,7 +11,7 @@ import UIKit
 
 class PhotoCell: UICollectionViewCell {
     
-    var imageView = UIImageView()
+    var imageView = UIImageView() //Imageview is not used so far
     var activityIndicator = UIActivityIndicatorView()
 
     override init(frame: CGRect) {
@@ -22,10 +22,9 @@ class PhotoCell: UICollectionViewCell {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(imageView)
         activityIndicator = UIActivityIndicatorView(style: .whiteLarge)
-        activityIndicator.startAnimating()
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(activityIndicator)
-        self.contentView.bringSubviewToFront(imageView)
+        //self.contentView.bringSubviewToFront(imageView)
         print("Photo Cell Init")
     }
     

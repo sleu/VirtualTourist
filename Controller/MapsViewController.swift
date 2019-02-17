@@ -83,7 +83,7 @@ class MapsViewController: UIViewController {
             }
             mapView.addAnnotation(pinAnnotation)
             let pin = Pin(lat: coordinate.latitude, long: coordinate.longitude, context: dataController.viewContext)
-            pin.getPhotos(context: dataController.viewContext) //Load photos!!!
+            pin.getPhotos(context: dataController.viewContext)
             
             do {
                 try dataController.viewContext.save()
