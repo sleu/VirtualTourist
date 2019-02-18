@@ -31,8 +31,7 @@ extension Photo {
         if let imageData = try? Data(contentsOf: imageURL) {
             let image = UIImage(data: imageData)
             let iData = image!.jpegData(compressionQuality: 0.9)
-            self.imageData = iData //TODO: possibly change here for image data format
-            print("photodownloaded")
+            self.imageData = iData 
         } else {
             print("Image does not exist at \(imageURL)")
         }

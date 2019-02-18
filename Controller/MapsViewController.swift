@@ -55,8 +55,7 @@ class MapsViewController: UIViewController {
         }
         
         guard let fetchedObj = fetchedResultsController.fetchedObjects else {
-            print("unable to fetch objects")
-            return
+            fatalError("unable to fetch objects")
         }
         
         var annotations = [MKPointAnnotation]()
@@ -73,7 +72,6 @@ class MapsViewController: UIViewController {
     
     @objc func createPin(_ sender: UIGestureRecognizer) {
         if sender.state == .began {
-            print("Begin")
             let loc = sender.location(in: mapView)
             let coordinate = mapView.convert(loc, toCoordinateFrom: mapView)
             let pinAnnotation = MKPointAnnotation()
@@ -84,14 +82,12 @@ class MapsViewController: UIViewController {
             mapView.addAnnotation(pinAnnotation)
             let pin = Pin(lat: coordinate.latitude, long: coordinate.longitude, context: dataController.viewContext)
             pin.getPhotos(context: dataController.viewContext)
-            
             do {
                 try dataController.viewContext.save()
                 try fetchedResultsController.performFetch()
             } catch {
                 print(error.localizedDescription)
             }
-            print("pin complete")
         }
     }
 }

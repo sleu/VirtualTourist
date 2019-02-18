@@ -24,19 +24,16 @@ extension Pin {
     
     func getPhotos(context: NSManagedObjectContext) {
         FlickrClient.shared.searchBy(latitude: latitude, longitude: longitude, pages: Int(pages)) { (photos, pages, errorMessage) in
-            DispatchQueue.main.async {
-                print("getphotos")
-                guard errorMessage == nil else {
-                    print("error found")
-                    return
-                }
-                self.pages = Int16(pages)
-                for p in photos! where p["url_m"] != nil {
-                    let newPhoto = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self, context: context)
+            guard errorMessage == nil else {
+                print("error found")
+                return
+            }
+            self.pages = Int16(pages)
+            for p in photos! where p["url_m"] != nil {
+                let newPhoto = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self, context: context)
+                DispatchQueue.global(qos: .background).async {
                     newPhoto.downloadPhoto()
-                    print("Creatingphoto")
                 }
-                print("photos completed")
             }
         }
     }

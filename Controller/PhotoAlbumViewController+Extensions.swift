@@ -29,7 +29,6 @@ extension PhotoAlbumViewController: MKMapViewDelegate,UICollectionViewDelegate, 
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let sectionInfo = fetchedResultsController.sections?[section] {
-            print("This should go second")
             print("number of items: \(sectionInfo.numberOfObjects)")
             return sectionInfo.numberOfObjects
         }
@@ -40,36 +39,35 @@ extension PhotoAlbumViewController: MKMapViewDelegate,UICollectionViewDelegate, 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
         cell.activityIndicator.startAnimating()
         cell.activityIndicator.isHidden = false
-        print("cellforitemat")
+        cell.backgroundView = nil
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        print("willDisplay called")
         let photo = fetchedResultsController.object(at: indexPath)
         let photoCell = cell as! PhotoCell
         if photo.imageData != nil {
-            print("Photo data!")
             photoCell.backgroundView = UIImageView(image: UIImage(data: photo.imageData!))
+            photoCell.activityIndicator.stopAnimating()
+            photoCell.activityIndicator.isHidden = true
         } else {
-            photo.downloadPhoto()
+            DispatchQueue.main.async {
+                photo.downloadPhoto()
+                photoCell.backgroundView = UIImageView(image: UIImage(data: photo.imageData!))
+                photoCell.activityIndicator.stopAnimating()
+                photoCell.activityIndicator.isHidden = true
+            }
+            
             DispatchQueue.global(qos: .background).async {
-                do {
-                    try self.dataController.viewContext.save()
-                    print("newphotosaved")
-                } catch {
-                    print(error.localizedDescription)
+                if self.dataController.viewContext.hasChanges {
+                    do {
+                        try self.dataController.viewContext.save()
+                    } catch {
+                        print(error.localizedDescription)
+                    }
                 }
             }
-            print("Photo downloaded!")
-            photoCell.backgroundView = UIImageView(image: UIImage(data: photo.imageData!))
-            
         }
-        
-        photoCell.activityIndicator.stopAnimating()
-        photoCell.activityIndicator.isHidden = true
-        
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath:IndexPath) {

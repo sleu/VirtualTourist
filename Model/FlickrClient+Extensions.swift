@@ -35,7 +35,6 @@ extension FlickrClient {
         static let BoundingBox = "bbox"
         static let Page = "page"
         static let PhotosPerPage = "per_page"
-        static let Accuracy = "accuracy" //check
     }
     
     // MARK: Flickr Parameter Values
@@ -48,8 +47,6 @@ extension FlickrClient {
         static let UseSafeSearch = "1"
         static let PhotosPerPage = "30"
         static let MaxPages = 133 //4000/30
-        static let AccuracyCityLevel = "11" //check
-        static let AccuracyStreetLevel = "16" //check
     }
     
     // MARK: Flickr Response Keys

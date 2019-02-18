@@ -11,21 +11,14 @@ import UIKit
 
 class PhotoCell: UICollectionViewCell {
     
-    var imageView = UIImageView() //Imageview is not used so far
     var activityIndicator = UIActivityIndicatorView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.orange
-        imageView.backgroundColor = UIColor.blue
-        imageView.contentMode = .scaleAspectFill
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(imageView)
+        self.backgroundColor = UIColor.black
         activityIndicator = UIActivityIndicatorView(style: .whiteLarge)
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(activityIndicator)
-        //self.contentView.bringSubviewToFront(imageView)
-        print("Photo Cell Init")
     }
     
     required init?(coder aDecoder: NSCoder) {

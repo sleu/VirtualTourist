@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class FlickrClient: NSObject {
     
@@ -95,5 +96,21 @@ class FlickrClient: NSObject {
             }
         }
         task.resume()
+    }
+    
+    func downloadPhoto(imageUrl: String, handler: @escaping(_ photoData: Data) -> Void) {
+        guard let imageURL = URL(string: imageUrl) else {
+            print("photo url is nil")
+            return
+        }
+        if let imageData = try? Data(contentsOf: imageURL) {
+            let image = UIImage(data: imageData)
+            let iData = image!.jpegData(compressionQuality: 0.9)
+            handler(iData!)
+            //self.imageData = iData
+            print("photodownloaded")
+        } else {
+            print("Image does not exist at \(imageURL)")
+        }
     }
 }

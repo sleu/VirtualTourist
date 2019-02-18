@@ -63,20 +63,14 @@ class PhotoAlbumViewController: UIViewController {
         let photos = fetchedResultsController.fetchedObjects
         for p in photos! {
             dataController.viewContext.delete(p)
-            print("all deleted")
         }
         do {
             try dataController.viewContext.save()
             try fetchedResultsController.performFetch()
-            print("deleted saved")
         } catch {
             print(error.localizedDescription)
         }
         prepareNewPhotos()
-        print("collectionvewreload")
-        //collectionView.reloadData()
-        print("reloadData")
-        newCollectButton.isEnabled = true
     }
     
     func displayNotification(_ error: String){
@@ -88,25 +82,25 @@ class PhotoAlbumViewController: UIViewController {
     func prepareNewPhotos() {
         let totalPages = Int((realPin?.pages.description)!)
         FlickrClient.shared.searchBy(latitude: (realPin?.latitude)!, longitude: (realPin?.longitude)!, pages: totalPages!) { (photos, pages, errorMessage) in
-            DispatchQueue.main.async {
                 guard errorMessage == nil else {
                     print("error found")
                     return
                 }
                 self.realPin?.pages = Int16(pages)
                 for p in photos! where p["url_m"] != nil {
-                    _ = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self.realPin!, context: self.dataController.viewContext)
-                    print("Creatingnewphoto")
+                    let newPhoto = Photo(url: p["url_m"] as! String, id: p["id"] as! String ,pin: self.realPin!, context: self.dataController.viewContext)
+                    DispatchQueue.global(qos: .background).async {
+                        newPhoto.downloadPhoto()
+                    }
                 }
-                print("newphotocompleted")
                 do {
                     try self.dataController.viewContext.save()
                     try self.fetchedResultsController.performFetch()
-                    print("newphotosaved")
                 } catch {
                     print(error.localizedDescription)
                 }
-            self.collectionView.reloadData()
+            DispatchQueue.main.async {                self.collectionView.reloadData()
+                self.newCollectButton.isEnabled = true
             }
         }
     }
@@ -115,11 +109,9 @@ class PhotoAlbumViewController: UIViewController {
         do {
             try self.dataController.viewContext.save()
             try self.fetchedResultsController.performFetch()
-            print("photodeletedsaved")
         } catch {
             print(error.localizedDescription)
         }
         collectionView.deleteItems(at: [indexPath])
-        //collectionView.reloadData()
     }
 }
